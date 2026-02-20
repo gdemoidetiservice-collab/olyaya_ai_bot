@@ -1,20 +1,10 @@
-# Telegram bot
 aiogram==3.4.1
-
-# AI - Google Gemini (бесплатно)
-google-generativeai==0.7.2
-
-# Планировщик
-APScheduler==3.10.4
-
-# Погода, HTTP запросы
-requests==2.31.0
-
-# Переменные окружения
 python-dotenv==1.0.1
-
-# Календарь (.ics)
-ics==0.7.2
-
-# Excel отчёты
+google-generativeai==0.7.2
+apscheduler==3.10.4
+gspread==6.0.2
+oauth2client==4.1.3
+requests==2.31.0
 openpyxl==3.1.2
+ics==0.7.2
+pydantic==2.5.3
