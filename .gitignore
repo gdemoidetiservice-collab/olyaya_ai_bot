@@ -1,27 +1,14 @@
-# Секреты — никогда не коммитить!
 .env
-credentials.json
-
-# Python
 __pycache__/
-*.py[cod]
+*.pyc
 *.pyo
 *.pyd
 .Python
+*.so
+*.egg
 *.egg-info/
 dist/
 build/
-.eggs/
-.venv/
-venv/
-env/
-
-# Временные файлы
+credentials.json
 *.ics
 *.xlsx
-/tmp/
-
-# IDE
-.idea/
-.vscode/
-*.swp
