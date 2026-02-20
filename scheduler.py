@@ -2,9 +2,10 @@
 Планировщик сообщений:
 - 07:00 — утреннее сообщение
 - 22:00 — вечерний разнос дня
-- 7-23 — случайные сообщения (3-10 в день)
+- 8-22 — случайные сообщения (3-7 в день), только из готового списка (без AI)
 """
 import random
+import asyncio
 import logging
 from datetime import datetime, timedelta
 
@@ -37,7 +38,7 @@ def start_scheduler(bot):
                     for t in tasks
                 )
             else:
-                tasks_text = "\nЗадач нет. Ну или ты ещё не записал — тогда сам виноват."
+                tasks_text = "\nЗадач нет — либо ты всё сделал, либо ничего не планировал."
 
             prompt = (
                 f"Напиши утреннее саркастическое приветствие для своего лучшего друга. "
@@ -49,7 +50,7 @@ def start_scheduler(bot):
         except Exception as e:
             logger.error(f"Morning message error: {e}")
 
-    # === Вечерний разнос в 22:00 ===
+    # === Вечернее сообщение в 22:00 ===
     @scheduler.scheduled_job(CronTrigger(hour=22, minute=0))
     async def evening_message():
         try:
@@ -59,19 +60,17 @@ def start_scheduler(bot):
         except Exception as e:
             logger.error(f"Evening message error: {e}")
 
-    # === Случайные сообщения в течение дня ===
+    # === Случайные сообщения — только из готового списка, без AI ===
     def schedule_random_messages():
-        """Планирует случайные сообщения на сегодня."""
-        count = random.randint(3, 10)
+        count = random.randint(3, 7)  # уменьшили максимум с 10 до 7
         today = datetime.now().replace(second=0, microsecond=0)
 
         scheduled_times = set()
         attempts = 0
         while len(scheduled_times) < count and attempts < 50:
             attempts += 1
-            hour = random.randint(8, 22)
+            hour = random.randint(8, 21)
             minute = random.randint(0, 59)
-            # Пропускаем если уже запланировано на это время или уже прошло
             if (hour, minute) in scheduled_times:
                 continue
             msg_time = today.replace(hour=hour, minute=minute)
@@ -79,20 +78,11 @@ def start_scheduler(bot):
                 continue
             scheduled_times.add((hour, minute))
 
-            # Создаём замыкание для каждого сообщения
+            # Только готовый текст — никаких AI-запросов в случайных сообщениях
             msg_text = random.choice(RANDOM_MESSAGES)
 
             async def send_random(text=msg_text):
                 try:
-                    # Иногда генерируем уникальное через AI, иногда берём из списка
-                    if random.random() < 0.4:
-                        prompt = (
-                            "Напиши одно короткое неожиданное сообщение своему другу "
-                            "в стиле дерзкой лучшей подруги. Тема: его самочувствие, "
-                            "работа, личная жизнь, здоровье или мотивация. "
-                            "С матом, с характером. Одно предложение или два максимум."
-                        )
-                        text = await ask_ai_simple(prompt)
                     await bot.send_message(OWNER_ID, text)
                 except Exception as e:
                     logger.error(f"Random message error: {e}")
@@ -103,7 +93,8 @@ def start_scheduler(bot):
                 id=f"random_{hour}_{minute}_{attempts}"
             )
 
-    # Планируем случайные сообщения сразу при старте и каждый день в полночь
+        logger.info(f"Запланировано {len(scheduled_times)} случайных сообщений на сегодня")
+
     schedule_random_messages()
 
     @scheduler.scheduled_job(CronTrigger(hour=0, minute=1))
