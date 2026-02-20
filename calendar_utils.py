@@ -1,5 +1,5 @@
 from ics import Calendar, Event
-from datetime import datetime, timedelta
+from datetime import datetime
 
 def create_event(title: str, date_str: str, time_str: str = "12:00"):
     try:
@@ -7,11 +7,11 @@ def create_event(title: str, date_str: str, time_str: str = "12:00"):
         e = Event()
         e.name = title
         
-        # Парсим дату
         date_parts = date_str.split(".")
         if len(date_parts) == 3:
             day, month, year = map(int, date_parts)
-            event_date = datetime(year, month, day, int(time_str.split(":")[0]), int(time_str.split(":")[1]))
+            hour, minute = map(int, time_str.split(":"))
+            event_date = datetime(year, month, day, hour, minute)
             e.begin = event_date
         
         c.events.add(e)
@@ -20,4 +20,5 @@ def create_event(title: str, date_str: str, time_str: str = "12:00"):
             f.writelines(c)
         return "event.ics"
     except Exception as e:
+        print(f"Calendar error: {e}")
         return None
