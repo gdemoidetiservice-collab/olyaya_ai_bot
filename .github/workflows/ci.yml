@@ -25,5 +25,5 @@ jobs:
     
     - name: Test imports
       run: |
-        python -c "import ai, config, memory, weather"
+        python -c "import config, ai, memory, weather"
         echo "All imports successful"
