@@ -1,70 +1,30 @@
-"""
-Память пользователя — хранит профиль и историю в памяти процесса.
-При рестарте бота данные сбрасываются (для персистентности нужна БД).
-"""
+from typing import Dict, Any
 
-# Профили пользователей: user_id -> dict
-user_profiles = {}
+# Хранение состояния опросника для пользователей
+user_states: Dict[int, Dict[str, Any]] = {}
 
-# Статус онбординга: user_id -> {"step": int, "answers": list}
-onboarding_states = {}
+# Вопросы для опросника
+QUESTIONS = [
+    "Привет! Давай знакомиться. Как тебя зовут?",
+    "Какое у тебя любимое время года?",
+    "Какая твоя любимая музыка?",
+    "Какие фильмы или сериалы ты любишь?",
+    "Как любишь отдыхать?",
+    "Какие привычки ты хочешь отслеживать?",
+    "В отношениях ли ты сейчас? Если нет, почему расстались?",
+    "Когда была последняя близость?",
+    "Что для тебя важно в интимной близости? (корректно)",
+    "С кем тебе нравится это делать?",
+    "Где тебе больше всего нравится?",
+    "Есть ли что-то, что ненавидишь?",
+    "Что тебя мотивирует и что раздражает?"
+]
 
-# Задачи: user_id -> list of {"title": str, "dt": str}
-user_tasks = {}
+def get_user_state(user_id: int) -> Dict:
+    if user_id not in user_states:
+        user_states[user_id] = {"step": 0, "answers": [], "authorized": False}
+    return user_states[user_id]
 
-
-def get_profile(user_id: int) -> dict:
-    if user_id not in user_profiles:
-        user_profiles[user_id] = {}
-    return user_profiles[user_id]
-
-
-def save_profile_answer(user_id: int, question: str, answer: str):
-    profile = get_profile(user_id)
-    profile[question] = answer
-
-
-def get_profile_summary(user_id: int) -> str:
-    profile = get_profile(user_id)
-    if not profile:
-        return ""
-    lines = ["Что я знаю о пользователе:"]
-    for q, a in profile.items():
-        lines.append(f"- {q}: {a}")
-    return "\n".join(lines)
-
-
-def is_onboarding(user_id: int) -> bool:
-    return user_id in onboarding_states
-
-
-def start_onboarding(user_id: int):
-    onboarding_states[user_id] = {"step": 0, "answers": []}
-
-
-def get_onboarding_step(user_id: int) -> int:
-    return onboarding_states.get(user_id, {}).get("step", 0)
-
-
-def save_onboarding_answer(user_id: int, question: str, answer: str):
-    save_profile_answer(user_id, question, answer)
-    if user_id in onboarding_states:
-        onboarding_states[user_id]["step"] += 1
-
-
-def finish_onboarding(user_id: int):
-    onboarding_states.pop(user_id, None)
-
-
-def add_task(user_id: int, title: str, dt: str = ""):
-    if user_id not in user_tasks:
-        user_tasks[user_id] = []
-    user_tasks[user_id].append({"title": title, "dt": dt})
-
-
-def get_tasks(user_id: int) -> list:
-    return user_tasks.get(user_id, [])
-
-
-def clear_tasks(user_id: int):
-    user_tasks[user_id] = []
+def save_memory(user_id: int, text: str):
+    # Здесь можно добавить сохранение в Google Sheets
+    pass
