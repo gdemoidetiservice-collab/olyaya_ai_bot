@@ -12,4 +12,5 @@ def create_report(data: list):
         wb.save("report.xlsx")
         return "report.xlsx"
     except Exception as e:
+        print(f"Excel error: {e}")
         return None
