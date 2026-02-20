@@ -7,6 +7,6 @@ def get_weather():
         response = requests.get(url, timeout=10)
         data = response.json()
         temp = data["current_weather"]["temperature"]
-        return f"Сейчас в Костроме: {temp}°C"
+        return f"Сейчас в Костроме: {temp}°C. Надевай трусы потеплее!"
     except Exception as e:
-        return "Не удалось получить погоду"
+        return "Не удалось получить погоду. Смотри в окно, сучка!"
