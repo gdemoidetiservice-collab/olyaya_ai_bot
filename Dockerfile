@@ -1,24 +1,23 @@
 FROM python:3.11-slim
 
-# Системные зависимости
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    libffi-dev \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
-# Сначала копируем только requirements для кэша слоёв
-COPY requirements.txt .
+# Системные зависимости для сборки
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libffi-dev \
+    libssl-dev \
+    python3-dev \
+    cargo \
+    && rm -rf /var/lib/apt/lists/*
 
-# Устанавливаем зависимости
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Копируем и устанавливаем зависимости
+COPY requirements.txt .
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install -r requirements.txt
 
 # Копируем весь проект
 COPY . .
 
-# Запускаем бота
-CMD ["python", "bot.py"]
+# Запуск
+CMD ["python", "main.py"]
