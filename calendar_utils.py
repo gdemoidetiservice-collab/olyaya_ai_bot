@@ -1,44 +1,23 @@
-"""
-Генерация .ics файлов для импорта в Apple Calendar / iOS.
-"""
-from datetime import datetime
-import uuid
+from ics import Calendar, Event
+from datetime import datetime, timedelta
 
-
-def create_ics(title: str, dt: datetime = None, description: str = "") -> str:
-    """
-    Создаёт содержимое .ics файла.
-    Возвращает строку с содержимым файла.
-    """
-    if dt is None:
-        dt = datetime.now()
-
-    uid = str(uuid.uuid4())
-    now_str = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-    dt_str = dt.strftime("%Y%m%dT%H%M%S")
-
-    ics_content = f"""BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//OlyaBot//OlyaBot//RU
-CALSCALE:GREGORIAN
-METHOD:PUBLISH
-BEGIN:VEVENT
-UID:{uid}
-DTSTAMP:{now_str}
-DTSTART:{dt_str}
-DTEND:{dt_str}
-SUMMARY:{title}
-DESCRIPTION:{description}
-END:VEVENT
-END:VCALENDAR"""
-
-    return ics_content
-
-
-def save_ics(title: str, dt: datetime = None, description: str = "") -> str:
-    """Сохраняет .ics файл и возвращает путь к нему."""
-    content = create_ics(title, dt, description)
-    filepath = f"/tmp/event_{uuid.uuid4().hex[:8]}.ics"
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(content)
-    return filepath
+def create_event(title: str, date_str: str, time_str: str = "12:00"):
+    try:
+        c = Calendar()
+        e = Event()
+        e.name = title
+        
+        # Парсим дату
+        date_parts = date_str.split(".")
+        if len(date_parts) == 3:
+            day, month, year = map(int, date_parts)
+            event_date = datetime(year, month, day, int(time_str.split(":")[0]), int(time_str.split(":")[1]))
+            e.begin = event_date
+        
+        c.events.add(e)
+        
+        with open("event.ics", "w") as f:
+            f.writelines(c)
+        return "event.ics"
+    except Exception as e:
+        return None
